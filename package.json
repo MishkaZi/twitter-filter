@@ -1,0 +1,34 @@
+{
+  "name": "twitter-bot",
+  "version": "1.0.0",
+  "description": "Twitter bot to filter tweets by specific words in it",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node src/index.ts",
+    "start": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "author": "Michael Zinoviev",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^17.0.0",
+    "@types/node-fetch": "^3.0.3",
+    "@types/twitter": "^1.7.1",
+    "tsc-node": "^0.0.3",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "date-fns": "^2.27.0",
+    "dotenv": "^10.0.0",
+    "needle": "^3.0.0",
+    "node-fetch": "^3.1.0",
+    "nodemailer": "^6.7.2",
+    "puppeteer": "^13.0.0",
+    "twit": "^2.2.11",
+    "twitter": "^1.7.1",
+    "twitter-api-v2": "^1.7.2",
+    "twitter-v2": "^1.1.0"
+  }
+}
