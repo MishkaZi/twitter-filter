@@ -1,15 +1,35 @@
 // Open a realtime stream of Tweets, filtered according to rules
 // https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
 
-const needle = require('needle');
+import needle from 'needle';
+import dotenv from 'dotenv';
+import Twitter from 'twitter';
+dotenv.config();
 
 // The code below sets the bearer token from your environment variables
 // To set environment variables on macOS or Linux, run the export command below from the terminal:
 // export BEARER_TOKEN='YOUR-TOKEN'
 const token = process.env.BEARER_TOKEN;
-
 const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
 const streamURL = 'https://api.twitter.com/2/tweets/search/stream';
+
+var client = new Twitter({
+  consumer_key: process.env.CONSUMER_KEY,
+  consumer_secret: process.env.CONSUMER_SECRET,
+  access_token_key: process.env.ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.ACCESS_TOKEN_SECRET,
+});
+
+// var params = { screen_name: 'nodejs' };
+// client.post(
+//   'statuses/update',
+//   { status: 'I Love Twitter 2' },
+//   function (error, tweet, response) {
+//     if (error) throw error;
+//     console.log(tweet); // Tweet body.
+//     // console.log(response); // Raw response object.
+//   }
+// );
 
 // this sets up two rules - the value is the search terms to match on, and the tag is an identifier that
 // will be applied to the Tweets return to show which rule they matched
@@ -19,28 +39,37 @@ const streamURL = 'https://api.twitter.com/2/tweets/search/stream';
 // Edit rules as desired below
 const rules = [
   {
-    value: 'otc merger -btc -crypto',
-    tag: '#otcstocks -btc',
+    value:
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) merger -is:retweet -is:reply lang:en',
+    tag: 'Looking for mergers',
+  },
+  {
+    value:
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks) metaverse -is:retweet -is:reply lang:en',
+    tag: 'Looking for metaverse',
+  },
+  {
+    value:
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) ("share buyback" OR buyback) -is:retweet -is:reply lang:en',
+    tag: 'Looking for buybacks',
+  },
+  {
+    value:
+      '(otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) covid -is:retweet -is:reply lang:en',
+    tag: 'Looking for covid ',
+  },
+  {
+    value:
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) (loi OR "letter of intent") -is:retweet -is:reply lang:en',
+    tag: 'Looking for letter of intent',
+  },
+
+  {
+    value:
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) blockchain -is:retweet -is:reply lang:en',
+    tag: 'Looking for blockchain',
   },
 ];
-
-//Mail
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'twitter.bot.filter@gmail.com',
-    pass: 'q1w2Er4t5',
-  },
-});
-
-var mailOptions = {
-  from: 'TwitterBot',
-  to: 'twitter.bot.filter@gmail.com',
-  subject: 'OTC Merger',
-  text: 'That was easy!',
-};
 
 async function getAllRules() {
   const response = await needle('get', rulesURL, {
@@ -48,6 +77,8 @@ async function getAllRules() {
       authorization: `Bearer ${token}`,
     },
   });
+
+  console.log('Got rules');
 
   if (response.statusCode !== 200) {
     console.log('Error:', response.statusMessage, response.statusCode);
@@ -77,8 +108,10 @@ async function deleteAllRules(rules) {
     },
   });
 
+  console.log('Rules deleted');
+
   if (response.statusCode !== 200) {
-    throw new Error(response.body);
+    throw new Error(JSON.stringify(response.body));
   }
 
   return response.body;
@@ -96,8 +129,10 @@ async function setRules() {
     },
   });
 
+  console.log('Rules updated');
+
   if (response.statusCode !== 201) {
-    throw new Error(response.body);
+    throw new Error(JSON.stringify(response.body));
   }
 
   return response.body;
@@ -113,24 +148,34 @@ function streamConnect(retryAttempt) {
   });
 
   stream
-    .on('data', async (data) => {
+    .on('data', (data) => {
       try {
         const json = JSON.parse(data);
         const updatedData = {
           ...json,
           link: `https://twitter.com/dosukoitintin/status/${json.data.id}`,
         };
-        console.log(updatedData);
-        mailOptions.text = updatedData.data.text + `\n` + updatedData.link;
-        //Sending email
+        var body =
+          updatedData.matching_rules.map((rule) => rule.tag) +
+          `\n` +
+          updatedData.data.text +
+          `\n` +
+          updatedData.link;
+        console.log(body);
 
-        await transporter.sendMail(mailOptions, function (error) {
-          if (error) {
-            console.log(error);
-          } else {
-            console.log('Email sent: ' + updatedData);
+        //Sending to twitter bot
+        var tweetId = json.data.id;
+        client.post(
+          'statuses/retweet/' + tweetId,
+          function (error, tweet, response) {
+            if (!error) {
+              console.log('Retweet sent to twitter Bot');
+            } else {
+              console.log(error);
+            }
           }
-        });
+        );
+
         // A successful connection resets retry count.
         retryAttempt = 0;
       } catch (e) {
@@ -181,63 +226,6 @@ function streamConnect(retryAttempt) {
   }
 
   // Listen to the stream.
+  console.log('Stream connected and running');
   streamConnect(0);
 })();
-
-// const Twit = require('twit');
-// require('dotenv').config();
-
-// const T = new Twit({
-//     consumer_key: process.env.consumer_key,
-//     consumer_secret: process.env.consumer_secret,
-//     access_token: process.env.access_token,
-//     access_token_secret: process.env.access_token_secret,
-// });
-
-// var stream = T.stream('statuses/filter', { track: 'vscode' });
-
-// stream.on('tweet', function (tweet) {
-//     console.log(tweet);
-// });
-
-// import dotenv from 'dotenv'
-// // import Twitter from 'twitter-v2';
-// import { ETwitterStreamEvent, TweetStream, TwitterApi, ETwitterApiError } from 'twitter-api-v2';
-
-// dotenv.config()
-// const twitterClient = new TwitterApi(process.env.BEARER_TOKEN as string);
-// const roClient = twitterClient.readOnly;
-
-// const main = async () => {
-//     const jsTweets = await roClient.v2.searchAll('JavaScript', { 'media.fields': 'url' });
-
-//     for (const tweet of jsTweets) {
-//         console.log(tweet);
-//     }
-// }
-
-// main()
-
-// // const client = new Twitter({
-// //     consumer_key: process.env.TWITTER_CONSUMER_KEY as string,
-// //     consumer_secret: process.env.TWITTER_CONSUMER_SECRET as string,
-// //     access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY as string,
-// //     access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET as string,
-// //     // bearer_token: process.env.BEARER_TOKEN as string
-// // });
-
-// // const main = async () => {
-// //     const stream = client.stream('tweets/search/stream/rules', {});
-// //     console.log(stream);
-// //     // Close the stream after 30s.
-// //     setTimeout(() => {
-// //         stream.close();
-// //     }, 30000);
-
-// //     for await (const { data } of stream) {
-// //         console.log(data);
-// //     }
-
-// // }
-
-// // main()
