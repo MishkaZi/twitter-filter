@@ -162,7 +162,7 @@ function streamConnect(retryAttempt) {
           `\n` +
           updatedData.link;
         // console.log(body);
-        console.log(JSON.stringify(data.text));
+        console.log(JSON.stringify(data));
 
         //Sending to twitter bot
         var tweetId = json.data.id;
