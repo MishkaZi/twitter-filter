@@ -201,7 +201,8 @@ function streamConnect(retryAttempt) {
               similar = true;
             }
           }
-          if ((similar = false)) {
+          if (similar === false) {
+            last200Tweets.push(json.data.text);
             //Sending to twitter bot
             var tweetId = json.data.id;
             client.post(
