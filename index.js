@@ -188,6 +188,18 @@ function streamConnect(retryAttempt) {
         //First tweet will be added to array
         if (last200Tweets.length === 0) {
           last200Tweets.push(json.data.text);
+          //Sending to twitter bot
+          var tweetId = json.data.id;
+          client.post(
+            'statuses/retweet/' + tweetId,
+            function (error, tweet, response) {
+              if (!error) {
+                console.log('Retweet sent to twitter Bot');
+              } else {
+                console.log(error);
+              }
+            }
+          );
         }
 
         //All other tweets will be compared and decided if its similar, or not
