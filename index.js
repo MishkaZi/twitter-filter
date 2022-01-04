@@ -186,30 +186,13 @@ function streamConnect(retryAttempt) {
           updatedData.link;
         console.log(body);
 
-        //First tweet will be added to array
-        if (last200Tweets.length === 0) {
-          last200Tweets.push(json.data.text);
-          //Sending to twitter bot
-          var tweetId = json.data.id;
-          client.post(
-            'statuses/retweet/' + tweetId,
-            function (error, tweet, response) {
-              if (!error) {
-                console.log('Retweet sent to twitter Bot');
-              } else {
-                console.log(error);
-              }
-            }
-          );
-        }
-
         //All other tweets will be compared and decided if its similar, or not
         if (last200Tweets.length >= 1) {
           console.log('last200Tweets.length = ' + last200Tweets.length);
 
           var result = 0;
           var similar = false;
-          for (let i = 0; i <= last200Tweets.length; i++) {
+          for (let i = 0; i < last200Tweets.length; i++) {
             console.log('inside for loop');
             console.log('last200Tweets[i] = ' + last200Tweets[i]);
             console.log('json.data.text = ' + json.data.text);
@@ -235,6 +218,23 @@ function streamConnect(retryAttempt) {
               }
             );
           }
+        }
+
+        //First tweet will be added to array
+        if (last200Tweets.length === 0) {
+          last200Tweets.push(json.data.text);
+          //Sending to twitter bot
+          var tweetId = json.data.id;
+          client.post(
+            'statuses/retweet/' + tweetId,
+            function (error, tweet, response) {
+              if (!error) {
+                console.log('Retweet sent to twitter Bot');
+              } else {
+                console.log(error);
+              }
+            }
+          );
         }
 
         //Clear memory after 200 tweets
