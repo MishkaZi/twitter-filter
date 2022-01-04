@@ -209,7 +209,7 @@ function streamConnect(retryAttempt) {
 
           var result = 0;
           var similar = false;
-          for (i = 0; i <= last200Tweets.length; i++) {
+          for (let i = 0; i <= last200Tweets.length; i++) {
             console.log('inside for loop');
             console.log('last200Tweets[i] = ' + last200Tweets[i]);
             console.log('json.data.text = ' + json.data.text);
