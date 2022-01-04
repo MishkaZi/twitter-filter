@@ -40,33 +40,33 @@ var client = new Twitter({
 const rules = [
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) merger -is:retweet -is:reply -is:quote lang:en',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) merger -is:retweet -is:reply -is:quote lang:en -MXSG',
     tag: 'Looking for mergers',
   },
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks) metaverse -is:retweet -is:reply -is:quote lang:en',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks) metaverse -is:retweet -is:reply -is:quote lang:en -MXSG',
     tag: 'Looking for metaverse',
   },
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) ("share buyback" OR buyback) -is:retweet -is:reply -is:quote lang:en',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) ("share buyback" OR buyback) -is:retweet -is:reply -is:quote lang:en -MXSG',
     tag: 'Looking for buybacks',
   },
   {
     value:
-      '(otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) covid -is:retweet -is:reply -is:quote lang:en',
+      '(otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) covid -is:retweet -is:reply -is:quote lang:en -MXSG',
     tag: 'Looking for covid ',
   },
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) (loi OR "letter of intent") -is:retweet -is:reply -is:quote lang:en',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) (loi OR "letter of intent") -is:retweet -is:reply -is:quote lang:en -MXSG',
     tag: 'Looking for letter of intent',
   },
 
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) blockchain -is:retweet -is:reply -is:quote lang:en',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) blockchain -is:retweet -is:reply -is:quote lang:en -MXSG',
     tag: 'Looking for blockchain',
   },
 ];
