@@ -48,7 +48,8 @@ const rules = [
   },
 ];
 
-//Comparing tweets to find duplicates ----------------------------------------------------------------------------
+//Comparing tweets to find duplicates based on Levenshtein distance---------------------------------------------------------------
+
 function similarity(s1, s2) {
   var longer = s1;
   var shorter = s2;
@@ -89,7 +90,7 @@ function editDistance(s1, s2) {
   return costs[s2.length];
 }
 
-//---------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
 
 async function getAllRules() {
   const response = await needle('get', rulesURL, {
@@ -184,6 +185,7 @@ function streamConnect(retryAttempt) {
           `\n` +
           updatedData.link;
         console.log(body);
+        console.log('last200Tweets.length = ' + last200Tweets.length);
 
         //First tweet will be added to array
         if (last200Tweets.length === 0) {
