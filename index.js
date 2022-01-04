@@ -1,14 +1,8 @@
-// Open a realtime stream of Tweets, filtered according to rules
-// https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
-
 import needle from 'needle';
 import dotenv from 'dotenv';
 import Twitter from 'twitter';
 dotenv.config();
 
-// The code below sets the bearer token from your environment variables
-// To set environment variables on macOS or Linux, run the export command below from the terminal:
-// export BEARER_TOKEN='YOUR-TOKEN'
 const token = process.env.BEARER_TOKEN;
 const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
 const streamURL = 'https://api.twitter.com/2/tweets/search/stream';
@@ -20,23 +14,6 @@ var client = new Twitter({
   access_token_secret: process.env.ACCESS_TOKEN_SECRET,
 });
 
-// var params = { screen_name: 'nodejs' };
-// client.post(
-//   'statuses/update',
-//   { status: 'I Love Twitter 2' },
-//   function (error, tweet, response) {
-//     if (error) throw error;
-//     console.log(tweet); // Tweet body.
-//     // console.log(response); // Raw response object.
-//   }
-// );
-
-// this sets up two rules - the value is the search terms to match on, and the tag is an identifier that
-// will be applied to the Tweets return to show which rule they matched
-// with a standard project with Basic Access, you can add up to 25 concurrent rules to your stream, and
-// each rule can be up to 512 characters long
-
-// Edit rules as desired below
 const rules = [
   {
     value:
@@ -70,6 +47,49 @@ const rules = [
     tag: 'Looking for blockchain',
   },
 ];
+
+//Comparing tweets to find duplicates ----------------------------------------------------------------------------
+function similarity(s1, s2) {
+  var longer = s1;
+  var shorter = s2;
+  if (s1.length < s2.length) {
+    longer = s2;
+    shorter = s1;
+  }
+  var longerLength = longer.length;
+  if (longerLength == 0) {
+    return 1.0;
+  }
+  return (
+    (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength)
+  );
+}
+
+function editDistance(s1, s2) {
+  s1 = s1.toLowerCase();
+  s2 = s2.toLowerCase();
+
+  var costs = new Array();
+  for (var i = 0; i <= s1.length; i++) {
+    var lastValue = i;
+    for (var j = 0; j <= s2.length; j++) {
+      if (i == 0) costs[j] = j;
+      else {
+        if (j > 0) {
+          var newValue = costs[j - 1];
+          if (s1.charAt(i - 1) != s2.charAt(j - 1))
+            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+          costs[j - 1] = lastValue;
+          lastValue = newValue;
+        }
+      }
+    }
+    if (i > 0) costs[s2.length] = lastValue;
+  }
+  return costs[s2.length];
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 
 async function getAllRules() {
   const response = await needle('get', rulesURL, {
@@ -138,6 +158,8 @@ async function setRules() {
   return response.body;
 }
 
+var last200Tweets = [];
+
 function streamConnect(retryAttempt) {
   const stream = needle.get(streamURL, {
     headers: {
@@ -161,21 +183,44 @@ function streamConnect(retryAttempt) {
           updatedData.data.text +
           `\n` +
           updatedData.link;
-        // console.log(body);
-        console.log(json);
+        console.log(body);
 
-        //Sending to twitter bot
-        var tweetId = json.data.id;
-        client.post(
-          'statuses/retweet/' + tweetId,
-          function (error, tweet, response) {
-            if (!error) {
-              console.log('Retweet sent to twitter Bot');
-            } else {
-              console.log(error);
+        //First tweet will be added to array
+        if (last200Tweets.length === 0) {
+          last200Tweets.push(json.data.text);
+        }
+
+        //All other tweets will be compared and decided if its similar, or not
+        if (last200Tweets.length >= 1) {
+          var result = 0;
+          var similar = false;
+          for (i = 0; i <= last200Tweets.length; i++) {
+            result = similarity(last200Tweets[i], json.data.text);
+            console.log(result);
+            if (result >= 0.8) {
+              similar = true;
             }
           }
-        );
+          if ((similar = false)) {
+            //Sending to twitter bot
+            var tweetId = json.data.id;
+            client.post(
+              'statuses/retweet/' + tweetId,
+              function (error, tweet, response) {
+                if (!error) {
+                  console.log('Retweet sent to twitter Bot');
+                } else {
+                  console.log(error);
+                }
+              }
+            );
+          }
+        }
+
+        //Clear memory after 200 tweets
+        if (last200Tweets.length >= 200) {
+          last200Tweets = [];
+        }
 
         // A successful connection resets retry count.
         retryAttempt = 0;
