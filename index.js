@@ -188,19 +188,14 @@ function streamConnect(retryAttempt) {
 
         //All other tweets will be compared and decided if its similar, or not
         if (last200Tweets.length >= 1) {
-          console.log('last200Tweets.length = ' + last200Tweets.length);
-
           var result = 0;
           var similar = false;
           for (let i = 0; i < last200Tweets.length; i++) {
-            console.log('inside for loop');
-            console.log('last200Tweets[i] = ' + last200Tweets[i]);
-            console.log('json.data.text = ' + json.data.text);
-
             result = similarity(last200Tweets[i], json.data.text);
             console.log(result);
             if (result >= 0.8) {
               similar = true;
+              break;
             }
           }
           if (similar === false) {
