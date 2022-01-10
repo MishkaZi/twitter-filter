@@ -15,37 +15,33 @@ var client = new Twitter({
   access_token_key: process.env.ACCESS_TOKEN_KEY,
   access_token_secret: process.env.ACCESS_TOKEN_SECRET,
 });
-
+// (otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks)
 const rules = [
   {
-    value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) merger -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
+    value: ' merger  -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for mergers',
   },
   {
-    value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks) metaverse -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
+    value: ' metaverse  -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for metaverse',
   },
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) ("share buyback" OR buyback) -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
+      ' ("share buyback" OR buyback)  -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for buybacks',
   },
   {
-    value:
-      '(otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) covid -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
+    value: ' covid  -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for covid ',
   },
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) (loi OR "letter of intent") -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
+      ' (loi OR "letter of intent")  -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for letter of intent',
   },
 
   {
-    value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) blockchain -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
+    value: ' blockchain  -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for blockchain',
   },
 ];
