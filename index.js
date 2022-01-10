@@ -1,6 +1,8 @@
 import needle from 'needle';
 import dotenv from 'dotenv';
 import Twitter from 'twitter';
+import nodemailer from 'nodemailer';
+
 dotenv.config();
 
 const token = process.env.BEARER_TOKEN;
@@ -17,36 +19,38 @@ var client = new Twitter({
 const rules = [
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) merger -(meme OR memes) -is:retweet -is:reply -is:quote lang:en -MXSG',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) merger -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for mergers',
   },
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks) metaverse -(meme OR memes) -is:retweet -is:reply -is:quote lang:en -MXSG',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks) metaverse -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for metaverse',
   },
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) ("share buyback" OR buyback) -(meme OR memes) -is:retweet -is:reply -is:quote lang:en -MXSG',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) ("share buyback" OR buyback) -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for buybacks',
   },
   {
     value:
-      '(otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) covid -(meme OR memes) -is:retweet -is:reply -is:quote lang:en -MXSG',
+      '(otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) covid -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for covid ',
   },
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) (loi OR "letter of intent") -(meme OR memes) -is:retweet -is:reply -is:quote lang:en -MXSG',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) (loi OR "letter of intent") -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for letter of intent',
   },
 
   {
     value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) blockchain -(meme OR memes) -is:retweet -is:reply -is:quote lang:en -MXSG',
+      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) blockchain -(meme OR memes) -is:retweet -is:reply -is:quote lang:en',
     tag: 'Looking for blockchain',
   },
 ];
+
+const tickerRegex = /[$][A-Z]{3,5}/g;
 
 //Comparing tweets to find duplicates based on Levenshtein distance---------------------------------------------------------------
 
@@ -91,7 +95,23 @@ function editDistance(s1, s2) {
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
+//Mail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL,
+    pass: process.env.GMAIL_PASSWORD,
+  },
+});
 
+var mailOptions = {
+  from: 'TwitterBot',
+  to: process.env.SEND_EMAIL_TO,
+  subject: 'OTC Twitter Filter',
+  text: '',
+};
+
+// ----------------------------------------------------------------------------------------------------------------
 async function getAllRules() {
   const response = await needle('get', rulesURL, {
     headers: {
@@ -186,19 +206,49 @@ function streamConnect(retryAttempt) {
           updatedData.link;
         console.log(body);
 
-        //All other tweets will be compared and decided if its similar, or not
-        if (last200Tweets.length >= 1) {
-          var result = 0;
-          var similar = false;
-          for (let i = 0; i < last200Tweets.length; i++) {
-            result = similarity(last200Tweets[i], json.data.text);
-            console.log(result);
-            if (result >= 0.8) {
-              similar = true;
-              break;
+        //Checking if there is a ticker inside tweet
+        if (tickerRegex.test(json.data.text)) {
+          console.log(
+            'Tickers in this tweet: ' + json.data.text.match(tickerRegex)
+          );
+          //All other tweets will be compared and decided if its similar, or not
+          if (last200Tweets.length >= 1) {
+            var result = 0;
+            var similar = false;
+            for (let i = 0; i < last200Tweets.length; i++) {
+              result = similarity(last200Tweets[i], json.data.text);
+              if (result >= 0.8) {
+                similar = true;
+                break;
+              }
+            }
+            if (similar === false) {
+              last200Tweets.push(json.data.text);
+              //Sending to twitter bot
+              var tweetId = json.data.id;
+              client.post(
+                'statuses/retweet/' + tweetId,
+                function (error, tweet, response) {
+                  if (!error) {
+                    console.log('Retweet sent to twitter Bot');
+                  } else {
+                    console.log(error);
+                  }
+                }
+              );
+              //Sending email
+              transporter.sendMail(mailOptions, function (error) {
+                if (error) {
+                  console.log(error);
+                } else {
+                  console.log('Email sent...');
+                }
+              });
             }
           }
-          if (similar === false) {
+
+          //First tweet will be added to array
+          if (last200Tweets.length === 0) {
             last200Tweets.push(json.data.text);
             //Sending to twitter bot
             var tweetId = json.data.id;
@@ -212,29 +262,22 @@ function streamConnect(retryAttempt) {
                 }
               }
             );
-          }
-        }
-
-        //First tweet will be added to array
-        if (last200Tweets.length === 0) {
-          last200Tweets.push(json.data.text);
-          //Sending to twitter bot
-          var tweetId = json.data.id;
-          client.post(
-            'statuses/retweet/' + tweetId,
-            function (error, tweet, response) {
-              if (!error) {
-                console.log('Retweet sent to twitter Bot');
-              } else {
+            //Sending email
+            transporter.sendMail(mailOptions, function (error) {
+              if (error) {
                 console.log(error);
+              } else {
+                console.log('Email sent...');
               }
-            }
-          );
-        }
+            });
+          }
 
-        //Clear memory after 200 tweets
-        if (last200Tweets.length >= 200) {
-          last200Tweets = [];
+          //Clear memory after 200 tweets
+          if (last200Tweets.length >= 200) {
+            last200Tweets = [];
+          }
+        } else {
+          console.log('This is a filler');
         }
 
         // A successful connection resets retry count.
