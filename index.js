@@ -209,7 +209,7 @@ function streamConnect(retryAttempt) {
           updatedData.link;
 
         mailOptions.text = body;
-        console.log('Number of original tweets: ' + last200Tweets.length());
+        console.log('Number of original tweets: ' + last200Tweets.length);
         console.log(body);
 
         //Checking if there is a ticker inside tweet
