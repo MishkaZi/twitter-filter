@@ -43,11 +43,11 @@ const rules = [
     tag: 'Looking for letter of intent',
   },
 
-  {
-    value:
-      '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) blockchain -#cryptocurrency -#crypto -#binance -#BTC -#nft   -is:retweet -is:reply -is:quote lang:en',
-    tag: 'Looking for blockchain',
-  },
+  // {
+  //   value:
+  //     '(otc OR #otc OR @otc OR otcstocks OR #otcstocks OR @otcstocks OR stocks OR #stocks OR @stocks) blockchain -#cryptocurrency -#crypto -#binance -#BTC -#nft   -is:retweet -is:reply -is:quote lang:en',
+  //   tag: 'Looking for blockchain',
+  // },
 ];
 
 const tickerRegex = /[$][A-Z]{3,5}/g;
@@ -227,26 +227,26 @@ function streamConnect(retryAttempt) {
             if (similar === false) {
               last200Tweets.push(json.data.text);
 
-              // //Sending to twitter bot
-              // var tweetId = json.data.id;
-              // client.post(
-              //   'statuses/retweet/' + tweetId,
-              //   function (error, tweet, response) {
-              //     if (!error) {
-              //       console.log('Retweet sent to twitter Bot');
-              //     } else {
-              //       console.log(error);
-              //     }
-              //   }
-              // );
-              // //Sending email
-              // transporter.sendMail(mailOptions, function (error) {
-              //   if (error) {
-              //     console.log(error);
-              //   } else {
-              //     console.log('Email sent...');
-              //   }
-              // });
+              //Sending to twitter bot
+              var tweetId = json.data.id;
+              client.post(
+                'statuses/retweet/' + tweetId,
+                function (error, tweet, response) {
+                  if (!error) {
+                    console.log('Retweet sent to twitter Bot');
+                  } else {
+                    console.log(error);
+                  }
+                }
+              );
+              //Sending email
+              transporter.sendMail(mailOptions, function (error) {
+                if (error) {
+                  console.log(error);
+                } else {
+                  console.log('Email sent...');
+                }
+              });
             }
           }
 
@@ -256,26 +256,26 @@ function streamConnect(retryAttempt) {
             console.log(
               '\u001b[' + 32 + 'm' + 'This is a legit tweet' + '\u001b[0m'
             );
-            // //Sending to twitter bot
-            // var tweetId = json.data.id;
-            // client.post(
-            //   'statuses/retweet/' + tweetId,
-            //   function (error, tweet, response) {
-            //     if (!error) {
-            //       console.log('Retweet sent to twitter Bot');
-            //     } else {
-            //       console.log(error);
-            //     }
-            //   }
-            // );
-            // //Sending email
-            // transporter.sendMail(mailOptions, function (error) {
-            //   if (error) {
-            //     console.log(error);
-            //   } else {
-            //     console.log('Email sent...');
-            //   }
-            // });
+            //Sending to twitter bot
+            var tweetId = json.data.id;
+            client.post(
+              'statuses/retweet/' + tweetId,
+              function (error, tweet, response) {
+                if (!error) {
+                  console.log('Retweet sent to twitter Bot');
+                } else {
+                  console.log(error);
+                }
+              }
+            );
+            //Sending email
+            transporter.sendMail(mailOptions, function (error) {
+              if (error) {
+                console.log(error);
+              } else {
+                console.log('Email sent...');
+              }
+            });
           }
 
           //Clear memory after 200 tweets
