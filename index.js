@@ -201,15 +201,15 @@ function streamConnect(retryAttempt) {
         var body =
           updatedData.matching_rules.map((rule) => rule.tag) +
           `\n` +
-          // +'Tickers in this tweet: ' +
-          // json.data.text.match(tickerRegex) +
+          +'Tickers in this tweet: ' +
+          json.data.text.match(tickerRegex) +
           `\n` +
           updatedData.data.text +
           `\n` +
           updatedData.link;
 
         mailOptions.text = body;
-        // console.log('Number of original tweets: ' + last200Tweets.length);
+        console.log('Number of original tweets: ' + last200Tweets.length);
         console.log(body);
 
         //Checking if there is a ticker inside tweet
@@ -257,7 +257,9 @@ function streamConnect(retryAttempt) {
           //First tweet will be added to array
           if (last200Tweets.length === 0) {
             last200Tweets.push(json.data.text);
-            console.log('++++++++++++This is a legit tweet+++++++++++++++');
+            console.log(
+              '++++++++++++++++++++This is a legit tweet+++++++++++++++++++++'
+            );
             //Sending to twitter bot
             var tweetId = json.data.id;
             client.post(
@@ -285,7 +287,9 @@ function streamConnect(retryAttempt) {
             last200Tweets = [];
           }
         } else {
-          console.log('--------------This is a filler ------------');
+          console.log(
+            '---------------------This is a filler ---------------------'
+          );
         }
 
         // A successful connection resets retry count.
