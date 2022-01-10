@@ -201,8 +201,8 @@ function streamConnect(retryAttempt) {
         var body =
           updatedData.matching_rules.map((rule) => rule.tag) +
           `\n` +
-          +'Tickers in this tweet: ' +
-          json.data.text.match(tickerRegex) +
+          // +'Tickers in this tweet: ' +
+          // json.data.text.match(tickerRegex) +
           `\n` +
           updatedData.data.text +
           `\n` +
