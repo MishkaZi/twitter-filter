@@ -297,6 +297,7 @@ function streamConnect(retryAttempt) {
         // A successful connection resets retry count.
         retryAttempt = 0;
       } catch (e) {
+        console.log(e);
         if (
           data.detail ===
           'This stream is currently at the maximum allowed connection limit.'
