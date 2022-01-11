@@ -225,6 +225,9 @@ function streamConnect(retryAttempt) {
               result = similarity(last200Tweets[i], json.data.text);
               if (result >= 0.8) {
                 similar = true;
+                console.log(
+                  '~~~~~~~~~~~~~~~~~~~~~This is a repost~~~~~~~~~~~~~~~~~~~~~~'
+                );
                 break;
               }
             }
