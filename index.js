@@ -230,7 +230,9 @@ function streamConnect(retryAttempt) {
             }
             if (similar === false) {
               last200Tweets.push(json.data.text);
-
+              console.log(
+                '++++++++++++++++++++This is a legit tweet+++++++++++++++++++++'
+              );
               //Sending to twitter bot
               var tweetId = json.data.id;
               client.post(
