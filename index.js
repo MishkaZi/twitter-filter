@@ -200,9 +200,9 @@ function streamConnect(retryAttempt) {
         };
         var body =
           updatedData.matching_rules.map((rule) => rule.tag) +
-          // `\n` +
-          // 'Tickers in this tweet: ' +
-          // json.data.text.match(tickerRegex) +
+          `\n` +
+          'Tickers in this tweet: ' +
+          json.data.text.match(tickerRegex) +
           `\n` +
           updatedData.data.text +
           `\n` +
@@ -214,9 +214,9 @@ function streamConnect(retryAttempt) {
 
         //Checking if there is a ticker inside tweet
         if (tickerRegex.test(json.data.text)) {
-          // console.log(
-          //   'Tickers in this tweet: ' + json.data.text.match(tickerRegex)
-          // );
+          console.log(
+            'Tickers in this tweet: ' + json.data.text.match(tickerRegex)
+          );
           //All other tweets will be compared and decided if its similar, or not
           if (last200Tweets.length >= 1) {
             var result = 0;
@@ -300,7 +300,6 @@ function streamConnect(retryAttempt) {
         // A successful connection resets retry count.
         retryAttempt = 0;
       } catch (e) {
-        console.log(e);
         if (
           data.detail ===
           'This stream is currently at the maximum allowed connection limit.'
