@@ -198,15 +198,7 @@ function streamConnect(retryAttempt) {
           ...json,
           link: `https://twitter.com/dosukoitintin/status/${json.data.id}`,
         };
-        var body =
-          updatedData.matching_rules.map((rule) => rule.tag) +
-          `\n` +
-          'Tickers in this tweet: ' +
-          json.data.text.match(tickerRegex) +
-          `\n` +
-          updatedData.data.text +
-          `\n` +
-          updatedData.link;
+        var body = updatedData.data.text + `\n` + updatedData.link;
 
         mailOptions.text = body;
         console.log('Number of original tweets: ' + last200Tweets.length);
